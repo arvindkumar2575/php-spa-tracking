@@ -223,7 +223,7 @@ insertVisitorDetails();
 
     <footer class="text-muted">
         <div class="container">
-            <p class="float-right">
+            <p class="float-right user-track" data-eventname="back_to_top_button_click">
                 <a href="#">Back to top</a>
             </p>
             <p>Album example is &copy; Bootstrap, but please download and customize it for yourself!</p>
