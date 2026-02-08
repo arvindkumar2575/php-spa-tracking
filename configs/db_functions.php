@@ -49,13 +49,47 @@ function dbSelect(
     }
 
     $sql = "SELECT $columns FROM `$table`";
+    $conditions = [];
+    $bindings = [];
 
-    // WHERE
     if (!empty($where)) {
-        $conditions = [];
         foreach ($where as $key => $value) {
-            $conditions[] = "`$key` = :$key";
+
+            // 1️⃣ ARRAY → IN(...)
+            if (is_array($value) && !isset($value['start'], $value['end'])) {
+                $placeholders = [];
+                foreach ($value as $i => $val) {
+                    $ph = "{$key}_$i";
+                    $placeholders[] = ":$ph";
+                    $bindings[$ph] = $val;
+                }
+                $conditions[] = "`$key` IN (" . implode(',', $placeholders) . ")";
+            }
+
+            // 2️⃣ RANGE → BETWEEN
+            elseif (is_array($value) && isset($value['start'], $value['end'])) {
+                $startKey = "{$key}_start";
+                $endKey   = "{$key}_end";
+                $conditions[] = "`$key` BETWEEN :$startKey AND :$endKey";
+                $bindings[$startKey] = $value['start'];
+                $bindings[$endKey]   = $value['end'];
+            }
+
+            // 3️⃣ >= or <= operators
+            elseif (str_ends_with($key, '>=' ) || str_ends_with($key, '<=')) {
+                $column = rtrim($key, '>=<'); // remove operator chars
+                $op = str_ends_with($key, '>=') ? '>=' : '<=';
+                $conditions[] = "`$column` $op :$column";
+                $bindings[$column] = $value;
+            }
+
+            // 4️⃣ Default = 
+            else {
+                $conditions[] = "`$key` = :$key";
+                $bindings[$key] = $value;
+            }
         }
+
         $sql .= " WHERE " . implode(' AND ', $conditions);
     }
 
@@ -76,8 +110,8 @@ function dbSelect(
 
     $stmt = $pdo->prepare($sql);
 
-    // Bind
-    foreach ($where as $key => $value) {
+    // Bind values safely
+    foreach ($bindings as $key => $value) {
         $stmt->bindValue(":$key", $value);
     }
 
@@ -85,6 +119,8 @@ function dbSelect(
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+
 
 function dbCount(
     string $table,
@@ -163,10 +199,10 @@ $insertData = fn(array $data) =>
         $data
     );
 
-$getAllVisitors = fn() =>
+$getAllVisitors = fn(array $where = []) =>
     dbSelect(
         $visitor_table,
-        [], 
+        $where, 
         '*', 
         'visit_time DESC'
     );

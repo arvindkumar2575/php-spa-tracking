@@ -155,18 +155,131 @@ if (isset($_POST['login'])) {
             tr:nth-child(even) {
                 background: #f9f9f9
             }
+            .filter-form {
+                display: flex;
+                align-items: flex-end;
+                gap: 12px;
+                padding: 12px 0;
+                background: #f8f9fa;
+                border-radius: 6px;
+                margin-bottom: 15px;
+            }
+
+            .filter-item {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .filter-item label {
+                font-size: 13px;
+                margin-bottom: 4px;
+                color: #555;
+            }
+
+            .filter-item input {
+                padding: 6px 8px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+
+            .filter-btn button {
+                padding: 7px 16px;
+                background: #0d6efd;
+                color: #fff;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            .filter-btn button:hover {
+                background: #0b5ed7;
+            }
+
         </style>
         <?php
-        // global $getAllVisitors;
-        $visitors = $getAllVisitors();
-        $visitors_events = getAllVisitorsEventsLog();
+        $where = [];
+        $uuids = "";
+        $startDate = "";
+        $endDate = "";
+
+        // UUID filter (comma-separated)
+        if (!empty($_GET['uuid'])) {
+            $uuids = $_GET['uuid'];
+            $uuidArray = array_filter(array_map('trim', explode(',', $_GET['uuid'])));
+            if ($uuidArray) {
+                $where['uuid'] = $uuidArray;
+            }
+        }
+        // Visit_time filter
+        $startDate = $_GET['start_date'] ?? '';
+        $endDate   = $_GET['end_date'] ?? '';
+
+        if ($startDate && $endDate) {
+            // Both start and end
+            $where['visit_time'] = [
+                'start' => $startDate . ' 00:00:00',
+                'end'   => $endDate . ' 23:59:59'
+            ];
+            $startDate = $startDate . ' 00:00:00';
+            $endDate = $endDate . ' 23:59:59';
+        } elseif ($startDate) {
+            // Only start date
+            $where['visit_time>='] = $startDate . ' 00:00:00';
+            $startDate = $startDate . ' 00:00:00';
+        } elseif ($endDate) {
+            // Only end date
+            $where['visit_time<='] = $endDate . ' 23:59:59';
+            $endDate = $endDate . ' 23:59:59';
+        }
+        // echo '<pre>';print_r($where);die;
+        $visitors = $getAllVisitors($where);
+
+
+        $visitors_events = getAllVisitorsEventsLog($uuids, $startDate, $endDate);
         // echo '<pre>';print_r($visitors);die;
         ?>
 
 
-        <div style="display: flex;justify-content: end;">
+        <div style="display: flex;justify-content: start;">
+            <a href="<?= base_url("report") ?>" style="margin-right: 10px;">Report</a>
             <a href="<?= base_url("logout") ?>">Logout</a>
         </div>
+
+        <form method="get" class="filter-form">
+            <!-- Start Date -->
+            <div class="filter-item">
+                <label for="start_date">Start Date</label>
+                <input type="date" id="start_date" name="start_date"
+                    value="<?= htmlspecialchars($_GET['start_date'] ?? '') ?>">
+            </div>
+
+            <!-- End Date -->
+            <div class="filter-item">
+                <label for="end_date">End Date</label>
+                <input type="date" id="end_date" name="end_date"
+                    value="<?= htmlspecialchars($_GET['end_date'] ?? '') ?>">
+            </div>
+
+            <!-- UUID -->
+            <div class="filter-item">
+                <label for="uuid">UUID(s) <small style="color:#555; font-size:12px;">(Comma separated)</small></label>
+                <input type="text" id="uuid" name="uuid" placeholder="abc,def,ghi"
+                    value="<?= htmlspecialchars($_GET['uuid'] ?? '') ?>">
+                
+            </div>
+
+            <!-- Filter button -->
+            <div class="filter-item filter-btn">
+                <button type="submit">Filter</button>
+            </div>
+            <!-- Reset button -->
+            <div class="filter-item filter-btn">
+                <a href="<?= base_url("report") ?>" style="text-decoration: none; color: #fff;"><button type="button">Clear</button></a>
+            </div>
+        </form>
+
+
+
 
         <h3 style="margin-bottom: 5px;">User Traking details</h3>
         <table>
@@ -224,10 +337,10 @@ if (isset($_POST['login'])) {
             ?>
                     <tr>
                         <td><?= $value['logged_at'] ?></td>
-                        <td><?= $value['uuid']??'NA' ?></td>
+                        <td><?= $value['uuid'] ?? 'NA' ?></td>
                         <td><?= $value['event_type'] ?></td>
                         <td><?= $value['event'] ?></td>
-                        <td><?= $value['source']??'NA' ?></td>
+                        <td><?= $value['source'] ?? 'NA' ?></td>
                     </tr>
                 <?php
                 }
