@@ -1,0 +1,7 @@
+{"uuid":"22de364d-39a3-4248-9087-e842f8a6ef91","event_type":"click","event":"main_button_click","source":"http://localhost/php-spa/","logged_at":"2026-02-08 23:05:02"}
+{"uuid":"22de364d-39a3-4248-9087-e842f8a6ef91","event_type":"click","event":"product_button_click","source":"http://localhost/php-spa/","logged_at":"2026-02-08 23:05:11"}
+{"uuid":"22de364d-39a3-4248-9087-e842f8a6ef91","event_type":"scroll","event":"scroll_50_percent","source":"http://localhost/php-spa/product","scroll_percentage":"50","logged_at":"2026-02-08 23:05:22"}
+{"uuid":"22de364d-39a3-4248-9087-e842f8a6ef91","event_type":"scroll","event":"scroll_to_end","source":"http://localhost/php-spa/product","logged_at":"2026-02-08 23:05:24"}
+{"uuid":"22de364d-39a3-4248-9087-e842f8a6ef91","event_type":"scroll","event":"navbar_out_of_view","source":"http://localhost/php-spa/","logged_at":"2026-02-08 23:07:14"}
+{"uuid":"22de364d-39a3-4248-9087-e842f8a6ef91","event_type":"scroll","event":"scroll_50_percent","source":"http://localhost/php-spa/","scroll_percentage":"52","logged_at":"2026-02-08 23:07:14"}
+{"uuid":"22de364d-39a3-4248-9087-e842f8a6ef91","event_type":"scroll","event":"scroll_to_end","source":"http://localhost/php-spa/","logged_at":"2026-02-08 23:07:15"}

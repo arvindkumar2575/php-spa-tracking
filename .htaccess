@@ -1,0 +1,17 @@
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Allow direct access to assets
+    RewriteRule ^assets/ - [L]
+
+    # Redirect blocked folders to index.php (404 route)
+    RewriteRule ^(pages|routes|configs)(/.*)?$ index.php [L,QSA]
+
+    # Route everything else through index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
